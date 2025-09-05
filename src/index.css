@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 197 100% 98%;
+    --foreground: 200 15% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 200 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 15% 20%;
+
+    --primary: 193 95% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 193 100% 75%;
+
+    --secondary: 162 85% 65%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 197 50% 95%;
+    --muted-foreground: 200 15% 60%;
+
+    --accent: 45 100% 70%;
+    --accent-foreground: 200 15% 20%;
+
+    --warning: 25 95% 65%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 197 30% 88%;
+    --input: 197 30% 94%;
+    --ring: 193 95% 55%;
+
+    /* Custom wellness palette */
+    --wellness-calm: 193 95% 55%;
+    --wellness-nature: 162 85% 65%;
+    --wellness-warm: 45 100% 70%;  
+    --wellness-critical: 0 84% 60%;
+    --wellness-safe: 162 85% 75%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--wellness-calm)), hsl(var(--wellness-nature)));
+    --gradient-warm: linear-gradient(135deg, hsl(var(--wellness-warm)), hsl(45 95% 75%));
+    --gradient-safe: linear-gradient(135deg, hsl(var(--wellness-safe)), hsl(var(--wellness-nature)));
+    --gradient-subtle: linear-gradient(180deg, hsl(197 100% 98%), hsl(197 50% 96%));
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(var(--wellness-calm) / 0.15);
+    --shadow-warm: 0 4px 20px -4px hsl(var(--wellness-warm) / 0.2);
+    --shadow-gentle: 0 2px 10px -2px hsl(200 15% 20% / 0.08);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 200 15% 8%;
+    --foreground: 197 50% 95%;
+
+    --card: 200 15% 10%;
+    --card-foreground: 197 50% 95%;
+
+    --popover: 200 15% 10%;
+    --popover-foreground: 197 50% 95%;
+
+    --primary: 193 95% 65%;
+    --primary-foreground: 200 15% 8%;
+    --primary-glow: 193 100% 80%;
+
+    --secondary: 162 65% 45%;
+    --secondary-foreground: 197 50% 95%;
+
+    --muted: 200 15% 15%;
+    --muted-foreground: 197 20% 70%;
+
+    --accent: 45 85% 60%;
+    --accent-foreground: 200 15% 8%;
+
+    --warning: 25 85% 55%;
+    --warning-foreground: 197 50% 95%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 197 50% 95%;
+
+    --border: 200 15% 20%;
+    --input: 200 15% 18%;
+    --ring: 193 95% 65%;
+
+    /* Custom wellness palette - dark mode */
+    --wellness-calm: 193 95% 65%;
+    --wellness-nature: 162 65% 55%;
+    --wellness-warm: 45 85% 60%;  
+    --wellness-critical: 0 70% 50%;
+    --wellness-safe: 162 65% 65%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--wellness-calm)), hsl(var(--wellness-nature)));
+    --gradient-warm: linear-gradient(135deg, hsl(var(--wellness-warm)), hsl(45 80% 65%));
+    --gradient-safe: linear-gradient(135deg, hsl(var(--wellness-safe)), hsl(var(--wellness-nature)));
+    --gradient-subtle: linear-gradient(180deg, hsl(200 15% 8%), hsl(200 15% 12%));
+
+    /* Dark mode shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-warm: 0 4px 20px -4px hsl(var(--wellness-warm) / 0.2);
+    --shadow-gentle: 0 2px 10px -2px hsl(0 0% 0% / 0.2);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
