@@ -168,24 +168,28 @@ export default function Dashboard() {
             title="Chat with Milo"
             description="Your AI companion for daily reflections."
             onClick={() => navigate('/aichat')}
+            className=""
           />
           <NeumorphicCard
             icon={<NotebookPen className="w-12 h-12 text-primary" />}
             title="Daily Journal"
             description="Record your thoughts, feelings, and progress."
             onClick={() => navigate('/journal')}
+            className=""
           />
           <NeumorphicCard
             icon={<UsersRound className="w-12 h-12 text-accent-foreground" />}
             title="Referral Network"
             description="Find therapists and support groups near you."
             onClick={() => navigate('/referral')}
+            className=""
           />
           <NeumorphicCard
             icon={<Goal className="w-12 h-12 text-wellness-concerned" />}
             title="Wellness Plan"
             description="Track your goals and personalized strategies."
             onClick={() => navigate('/plan')}
+            className=""
           />
         </div>
 

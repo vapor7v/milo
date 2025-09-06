@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../integrations/firebase/client';
 import { Layout, Container } from '@/components/Layout';
 import { WellnessButton } from '@/components/WellnessButton';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Sparkles, Users } from 'lucide-react';
 
-const Feature = ({ number, title, description }) => (
+const Feature = ({ number, title, description }: { number: number; title: string; description: string }) => (
   <div className="flex items-start gap-4 mb-8">
     <div className="w-8 h-8 flex-shrink-0 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-bold">
       {number}
@@ -21,15 +19,6 @@ const Feature = ({ number, title, description }) => (
 
 export default function Index() {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate('/dashboard');
-      }
-    });
-    return () => unsubscribe();
-  }, [navigate]);
 
   return (
     <Layout>
@@ -57,10 +46,10 @@ export default function Index() {
       <Container className="py-16 lg:py-24">
         <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
-            <Feature number="1" title="Complete Your Assessment" description="Quick, evidence-based screening to understand your current wellness level." />
-            <Feature number="2" title="Get Your Personalized Plan" description="Receive tailored wellness activities and coping strategies for your needs." />
-            <Feature number="3" title="Build Healthy Habits" description="Smart nudges and engaging challenges help you form lasting wellness habits." />
-            <Feature number="4" title="Connect When Needed" description="Automatic escalation to professional help when your wellness needs extra support." />
+            <Feature number={1} title="Complete Your Assessment" description="Quick, evidence-based screening to understand your current wellness level." />
+            <Feature number={2} title="Get Your Personalized Plan" description="Receive tailored wellness activities and coping strategies for your needs." />
+            <Feature number={3} title="Build Healthy Habits" description="Smart nudges and engaging challenges help you form lasting wellness habits." />
+            <Feature number={4} title="Connect When Needed" description="Automatic escalation to professional help when your wellness needs extra support." />
           </div>
           <Card className="bg-secondary/10 border-0 rounded-2xl p-8 lg:p-10 text-center shadow-lg">
             <div className="inline-block bg-secondary/20 p-4 rounded-full mb-5">

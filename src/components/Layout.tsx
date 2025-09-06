@@ -20,9 +20,7 @@ const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(({ className, backg
 });
 Layout.displayName = 'Layout';
 
-interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-const Container = React.forwardRef<HTMLDivElement, ContainerProps>(({ className, ...props }, ref) => {
+const Container = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => {
   return (
     <div
       className={`container mx-auto px-4 sm:px-6 lg:px-8 ${className}`}
