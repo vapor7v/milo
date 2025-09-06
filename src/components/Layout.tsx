@@ -1,50 +1,36 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
 
-interface LayoutProps {
-  children: React.ReactNode;
-  className?: string;
-  background?: 'default' | 'gradient' | 'subtle';
+interface LayoutProps extends React.HTMLAttributes<HTMLDivElement> {
+  background?: 'default' | 'gradient';
 }
 
-export const Layout = ({ children, className, background = 'default' }: LayoutProps) => {
+const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(({ className, background = 'default', ...props }, ref) => {
   const backgroundClasses = {
-    default: 'bg-background',
-    gradient: 'bg-gradient-subtle',
-    subtle: 'bg-muted/30',
+    default: 'bg-background text-foreground',
+    gradient: 'bg-gradient-to-br from-background via-secondary/20 to-background text-foreground'
   };
 
   return (
-    <div className={cn(
-      'min-h-screen',
-      backgroundClasses[background],
-      className
-    )}>
-      {children}
-    </div>
+    <div
+      className={`min-h-screen w-full ${backgroundClasses[background]} ${className}`}
+      ref={ref}
+      {...props}
+    />
   );
-};
+});
+Layout.displayName = 'Layout';
 
-interface ContainerProps {
-  children: React.ReactNode;
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
-}
+interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export const Container = ({ children, className, size = 'md' }: ContainerProps) => {
-  const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-  };
-
+const Container = React.forwardRef<HTMLDivElement, ContainerProps>(({ className, ...props }, ref) => {
   return (
-    <div className={cn(
-      'mx-auto px-6 py-8',
-      sizeClasses[size],
-      className
-    )}>
-      {children}
-    </div>
+    <div
+      className={`container mx-auto px-4 sm:px-6 lg:px-8 ${className}`}
+      ref={ref}
+      {...props}
+    />
   );
-};
+});
+Container.displayName = 'Container';
+
+export { Layout, Container };

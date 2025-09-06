@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle, AlertTriangle, XCircle, Shield } from 'lucide-react';
+import { CheckCircle, Shield, AlertCircle, AlertTriangle, XCircle } from 'lucide-react';
 
 export type RiskLevelType = 1 | 2 | 3 | 4 | 5;
 
@@ -23,21 +23,21 @@ const riskLevelConfig = {
     label: 'Mild Symptoms',
     description: 'Some signs of stress. Let\'s work on some coping strategies.',
     icon: Shield,
-    color: 'text-wellness-calm',
-    bgColor: 'bg-wellness-calm/10',
-    borderColor: 'border-wellness-calm/20'
+    color: 'text-wellness-concerned',
+    bgColor: 'bg-wellness-concerned/10',
+    borderColor: 'border-wellness-concerned/20'
   },
   3: {
     label: 'Moderate',
-    description: 'Noticeable symptoms affecting daily life. Regular support recommended.',
+    description: 'Symptoms may be impacting your daily life. This is a good time to focus on self-care and consider talking to someone.',
     icon: AlertCircle,
-    color: 'text-wellness-warm',
-    bgColor: 'bg-wellness-warm/10',
-    borderColor: 'border-wellness-warm/20'
+    color: 'text-wellness-warning',
+    bgColor: 'bg-wellness-warning/10',
+    borderColor: 'border-wellness-warning/20'
   },
   4: {
     label: 'Severe',
-    description: 'Significant impact on daily functioning. Professional help strongly recommended.',
+    description: 'Significant impact on daily functioning. Professional help is strongly recommended.',
     icon: AlertTriangle,
     color: 'text-warning',
     bgColor: 'bg-warning/10',
@@ -45,7 +45,7 @@ const riskLevelConfig = {
   },
   5: {
     label: 'Crisis',
-    description: 'Immediate professional intervention needed. Please reach out for help now.',
+    description: 'Immediate professional intervention is needed. Please reach out for help now.',
     icon: XCircle,
     color: 'text-wellness-critical',
     bgColor: 'bg-wellness-critical/10',

@@ -8,13 +8,14 @@ const wellnessButtonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-gradient-primary text-primary-foreground shadow-soft hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
-        secondary: "bg-gradient-safe text-secondary-foreground shadow-gentle border border-border hover:shadow-soft hover:scale-[1.02]",
-        warm: "bg-gradient-warm text-warning-foreground shadow-warm hover:shadow-lg hover:scale-[1.02]",
-        outline: "border-2 border-primary text-primary bg-background hover:bg-primary/5 hover:shadow-gentle",
+        primary: "bg-primary text-primary-foreground shadow-sm hover:shadow-md active:scale-[0.99]",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:shadow-md",
+        accent: "bg-accent/10 text-accent-foreground border border-accent/20 hover:bg-accent/20",
+        outline: "border border-primary text-primary bg-transparent hover:bg-primary/10",
         ghost: "text-primary hover:bg-primary/10 hover:text-primary",
-        calm: "bg-wellness-calm/10 text-wellness-calm border border-wellness-calm/20 hover:bg-wellness-calm/20",
-        critical: "bg-wellness-critical text-white shadow-lg hover:bg-wellness-critical/90"
+        critical: "bg-wellness-critical text-destructive-foreground shadow-md hover:bg-wellness-critical/90",
+        safe: "bg-wellness-safe text-white shadow-sm hover:bg-wellness-safe/90",
+        concerned: "bg-wellness-concerned text-white shadow-sm hover:bg-wellness-concerned/90",
       },
       size: {
         default: "h-12 px-6 py-3",

@@ -17,7 +17,7 @@ export default function MeditationChallenge() {
   const progress = ((totalTime - timeLeft) / totalTime) * 100;
 
   useEffect(() => {
-    let interval = null;
+    let interval: NodeJS.Timeout | null = null;
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft(time => {
@@ -29,13 +29,14 @@ export default function MeditationChallenge() {
           return time - 1;
         });
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && !isCompleted) {
       setIsCompleted(true);
+      setIsActive(false);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timeLeft]);
+  }, [isActive, timeLeft, isCompleted]);
 
   const startSession = () => {
     setSessionStarted(true);
@@ -48,7 +49,7 @@ export default function MeditationChallenge() {
     setIsCompleted(false);
     setSessionStarted(false);
   };
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -57,42 +58,48 @@ export default function MeditationChallenge() {
   return (
     <Layout background="gradient">
       <Container className="max-w-md mx-auto">
-        <Card className="p-8 mt-10 mb-8 shadow-md border-0 rounded-2xl bg-white flex flex-col items-center">
-          <h2 className="text-2xl font-bold mb-2 text-center text-blue-700">Meditation Challenge</h2>
-          <p className="text-gray-500 mb-6 text-center">Take 5 minutes to relax, breathe, and focus on your well-being.</p>
+        <Card className="p-8 mt-10 mb-8 shadow-md border-0 rounded-2xl bg-white flex flex-col items-center text-center">
+          <h2 className="text-2xl font-bold mb-2 text-primary">Meditation Challenge</h2>
+          <p className="text-muted-foreground mb-6">Take 5 minutes to relax, breathe, and focus on your well-being.</p>
+          
           <div className="w-full flex flex-col items-center mb-6">
-            <Progress value={progress} className="mb-4 bg-blue-100 h-3 rounded-full" />
-            <div className="text-4xl font-mono text-blue-600 mb-2">{formatTime(timeLeft)}</div>
+            <Progress value={progress} className="mb-4 h-3" />
+            <div className="text-4xl font-mono text-primary mb-2">{formatTime(timeLeft)}</div>
             {isCompleted && (
               <div className="flex items-center gap-2 text-green-600 font-semibold mb-2">
                 <CheckCircle className="w-5 h-5" /> Session Complete!
               </div>
             )}
           </div>
+
           <div className="flex gap-4 mb-4">
-            {!sessionStarted && (
-              <WellnessButton onClick={startSession} className="bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-400">
+            {!sessionStarted ? (
+              <WellnessButton onClick={startSession} size="lg">
                 <Play className="w-5 h-5 mr-2" /> Start
               </WellnessButton>
-            )}
-            {sessionStarted && !isCompleted && (
+            ) : !isCompleted ? (
               <>
                 {isActive ? (
-                  <WellnessButton onClick={pauseSession} className="bg-yellow-400 text-white hover:bg-yellow-500 focus:ring-2 focus:ring-yellow-300">
+                  <WellnessButton onClick={pauseSession} className="bg-yellow-400 text-black hover:bg-yellow-500 focus:ring-2 focus:ring-yellow-300">
                     <Pause className="w-5 h-5 mr-2" /> Pause
                   </WellnessButton>
                 ) : (
-                  <WellnessButton onClick={startSession} className="bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-400">
+                  <WellnessButton onClick={startSession}>
                     <Play className="w-5 h-5 mr-2" /> Resume
                   </WellnessButton>
                 )}
-                <WellnessButton onClick={resetSession} className="bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-2 focus:ring-gray-300">
+                <WellnessButton onClick={resetSession} variant="secondary">
                   <RotateCcw className="w-5 h-5 mr-2" /> Reset
                 </WellnessButton>
               </>
+            ) : (
+                 <WellnessButton onClick={resetSession}>
+                    <RotateCcw className="w-5 h-5 mr-2" /> Start Again
+                  </WellnessButton>
             )}
           </div>
-          <WellnessButton onClick={() => navigate('/dashboard')} variant="outline" className="w-full mt-2 border-blue-400 text-blue-700 hover:bg-blue-50 focus:ring-2 focus:ring-blue-300">
+          
+          <WellnessButton onClick={() => navigate('/dashboard')} variant="ghost" className="w-full mt-2">
             Back to Dashboard
           </WellnessButton>
         </Card>

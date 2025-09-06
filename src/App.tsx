@@ -4,12 +4,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import AIChat from "./pages/AIChat";
 import MeditationChallenge from "./pages/MeditationChallenge";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
+import Referral from "./pages/Referral";
+import CheckIn from "./pages/CheckIn";
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/aichat" element={<AIChat />} />
           <Route path="/meditation-challenge" element={<MeditationChallenge />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/referral" element={<Referral />} />
+          <Route path="/check-in" element={<CheckIn />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
