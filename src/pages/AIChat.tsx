@@ -7,29 +7,49 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, AlertTriangle } from 'lucide-react';
+import { getGenerativeAIService } from '@/integrations/firebase/client';
+import { getGenerativeModel, ChatSession } from 'firebase/ai';
 
 interface Message {
   id: string;
   text: string;
   sender: 'user' | 'ai';
   timestamp: Date;
-  mood?: 'supportive' | 'concerned' | 'encouraging';
 }
 
 export default function AIChat() {
   const navigate = useNavigate();
+  const [chat, setChat] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       text: "Hi there! I'm Milo, your AI companion. I'm here to listen and support you. How are you feeling today? 💙",
       sender: 'ai',
       timestamp: new Date(),
-      mood: 'supportive'
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Initialize the model and chat session safely after the component has mounted.
+    try {
+      const generativeAI = getGenerativeAIService();
+      const model = getGenerativeModel(generativeAI, {
+        model: 'gemini-1.5-flash-preview-0514',
+        systemInstruction: {
+          parts: [{ text: "You are Milo, a friendly and supportive wellness companion. Your goal is to help users reflect, feel understood, and offer gentle guidance. Do not provide medical advice. Keep your responses concise and encouraging." }]
+        },
+      });
+      const newChat = model.startChat({ history: [] });
+      setChat(newChat);
+    } catch (e: any) {
+      console.error("Failed to initialize generative model:", e);
+      setInitError(`Milo encountered an error during startup: ${e.message}`);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,43 +59,28 @@ export default function AIChat() {
     scrollToBottom();
   }, [messages]);
 
-  const generateAIResponse = (userMessage: string): Message => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    let response = "I hear you. Can you tell me more about what's on your mind?";
-    let mood: 'supportive' | 'concerned' | 'encouraging' = 'supportive';
-
-    if (lowerMessage.includes('sad') || lowerMessage.includes('depressed') || lowerMessage.includes('down')) {
-      response = "I'm sorry you're feeling this way. It's okay to feel sad sometimes. Would you like to try a quick breathing exercise together, or would you prefer to talk about what's making you feel down?";
-      mood = 'concerned';
-    } else if (lowerMessage.includes('anxious') || lowerMessage.includes('worried') || lowerMessage.includes('stress')) {
-      response = "Anxiety can be really overwhelming. Let's take this one step at a time. Have you tried any grounding techniques today? I can guide you through a simple 5-4-3-2-1 exercise if you'd like.";
-      mood = 'supportive';
-    } else if (lowerMessage.includes('good') || lowerMessage.includes('great') || lowerMessage.includes('happy')) {
-      response = "That's wonderful to hear! I'm so glad you're feeling good today. What's been helping you feel this way? It's great to celebrate these positive moments. 🌟";
-      mood = 'encouraging';
-    } else if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
-      response = "I'm here to help in whatever way I can. If you're looking for professional support, I can help you find resources. For now, I'm here to listen and support you. What kind of help do you need?";
-      mood = 'supportive';
+  useEffect(() => {
+    if (initError) {
+        const errorMessage: Message = {
+            id: Date.now().toString(),
+            text: initError,
+            sender: 'ai',
+            timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
     }
+  }, [initError]);
 
-    // Crisis detection - simplified for demo
-    if (lowerMessage.includes('hurt myself') || lowerMessage.includes('suicide') || lowerMessage.includes('end it all')) {
-      response = "I'm very concerned about you right now. Please know that you matter and there are people who want to help. I strongly encourage you to reach out to a crisis hotline: 988 (Suicide & Crisis Lifeline). Would you like me to help you find immediate professional support?";
-      mood = 'concerned';
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || !chat) {
+        if (!chat) {
+            console.error("Chat session not initialized.");
+            const errorMsg = initError || "Chat session not ready, please wait a moment and try again.";
+            const errorMessage: Message = { id: Date.now().toString(), text: errorMsg, sender: 'ai', timestamp: new Date() };
+            setMessages(prev => [...prev, errorMessage]);
+        }
+        return;
     }
-
-    return {
-      id: Date.now().toString(),
-      text: response,
-      sender: 'ai',
-      timestamp: new Date(),
-      mood
-    };
-  };
-
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -85,15 +90,37 @@ export default function AIChat() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInputValue = inputValue;
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI typing delay
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputValue);
-      setMessages(prev => [...prev, aiResponse]);
+    try {
+      const result = await chat.sendMessage(currentInputValue);
+      const response = await result.response;
+      const aiResponse = response.text();
+
+      const aiMessage: Message = {
+        id: Date.now().toString(),
+        text: aiResponse,
+        sender: 'ai',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+
+    } catch (err: any) {
+        console.error("Error calling Gemini function:", err);
+        const displayError = `Milo encountered an error: ${err.message}`;
+        const errorMessage: Message = {
+            id: Date.now().toString(),
+            text: displayError,
+            sender: 'ai',
+            timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -102,6 +129,8 @@ export default function AIChat() {
       handleSendMessage();
     }
   };
+
+  const isUIBlocked = isTyping || !chat;
 
   return (
     <Layout background="gradient">
@@ -115,9 +144,7 @@ export default function AIChat() {
             <ArrowLeft className="w-5 h-5" />
           </WellnessButton>
           <Avatar className="w-10 h-10">
-            <AvatarFallback className="bg-primary text-white">
-              M
-            </AvatarFallback>
+            <AvatarFallback className="bg-primary text-white">M</AvatarFallback>
           </Avatar>
           <div>
             <h1 className="font-semibold text-primary">Milo</h1>
@@ -138,33 +165,27 @@ export default function AIChat() {
                         >
                         {message.sender === 'ai' && (
                             <Avatar className="w-8 h-8">
-                            <AvatarFallback className="bg-primary text-white text-sm">
-                                M
-                            </AvatarFallback>
+                            <AvatarFallback className="bg-primary text-white text-sm">M</AvatarFallback>
                             </Avatar>
                         )}
-                        
                         <div
                             className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
                             message.sender === 'user'
                                 ? 'bg-primary text-primary-foreground rounded-br-none'
-                                : message.mood === 'concerned'
+                                : message.text.includes('Milo encountered an error')
                                 ? 'bg-red-100 text-red-900 rounded-bl-none'
                                 : 'bg-gray-100 text-gray-900 rounded-bl-none'
                             }`}
                         >
                             <p className="text-sm leading-relaxed">{message.text}</p>
                         </div>
-                        
                         </div>
                     ))}
                     
                     {isTyping && (
                         <div className="flex gap-3 items-end">
                         <Avatar className="w-8 h-8">
-                            <AvatarFallback className="bg-primary text-white text-sm">
-                            M
-                            </AvatarFallback>
+                            <AvatarFallback className="bg-primary text-white text-sm">M</AvatarFallback>
                         </Avatar>
                         <div className="bg-gray-100 rounded-2xl px-4 py-3 shadow-sm rounded-bl-none">
                             <div className="flex gap-1.5">
@@ -184,13 +205,13 @@ export default function AIChat() {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Type a message..."
+                        placeholder={initError ? "AI is unavailable" : "Type a message..."}
                         className="flex-1 rounded-full px-4 py-2"
-                        disabled={isTyping}
+                        disabled={isUIBlocked}
                     />
                     <WellnessButton
                         onClick={handleSendMessage}
-                        disabled={!inputValue.trim() || isTyping}
+                        disabled={!inputValue.trim() || isUIBlocked}
                         size="icon"
                         className="rounded-full"
                     >

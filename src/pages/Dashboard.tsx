@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { auth, db } from '@/integrations/firebase/client'; // Corrected import
-import { doc, getDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Container } from '@/components/Layout';
 import { WellnessButton } from '@/components/WellnessButton';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, Check, BotMessageSquare, NotebookPen, UsersRound, Goal } from 'lucide-react';
+import { AlertTriangle, Check, BotMessageSquare, NotebookPen, UsersRound, Goal, ArrowRight } from 'lucide-react';
+import { useUserData } from '@/hooks/useUserData';
+import { useAuth } from '@/hooks/useAuth';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { auth } from '@/integrations/firebase/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,104 +21,82 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+// This would ideally be in a utils file
 const getTodaysTasks = (riskLevel) => {
   const tasks = {
-    1: [{ id: 1, title: '5-minute breathing exercise', completed: true }, { id: 2, title: 'Mood check-in', completed: false }],
-    2: [{ id: 1, title: '10-minute guided meditation', completed: true }, { id: 2, title: 'Journal about your day', completed: false }],
-    3: [{ id: 1, title: 'Practice mindfulness', completed: false }, { id: 2, title: 'Chat with Milo', completed: false }],
-    4: [{ id: 1, title: 'Review professional support options', completed: false }, { id: 2, title: 'Talk to a trusted friend', completed: false }],
-    5: [{ id: 1, title: 'Contact crisis support (988)', completed: false }, { id: 2, title: 'Reach out to your emergency contact', completed: false }]
+    1: [{ id: 1, title: 'Complete a 5-minute breathing exercise', completed: true }, { id: 2, title: 'Check in with your mood for the day', completed: false }],
+    2: [{ id: 1, title: 'Try a 10-minute guided meditation', completed: true }, { id: 2, title: 'Write a short journal entry about your day', completed: false }],
+    3: [{ id: 1, title: 'Practice a short mindfulness exercise', completed: false }, { id: 2, title: "Chat with Milo about what's on your mind", completed: false }],
+    4: [{ id: 1, title: 'Review your personalized support options', completed: false }, { id: 2, title: 'Connect with a trusted friend or family member', completed: false }],
+    5: [{ id: 1, title: 'Contact crisis support (988) immediately', completed: false }, { id: 2, title: 'Reach out to your designated emergency contact', completed: false }]
   };
   return tasks[riskLevel] || [];
 };
 
-const NeumorphicCard = ({ icon, title, description, onClick, className }) => (
-  <div 
-    className={`bg-background rounded-2xl shadow-neumorphic p-6 flex flex-col items-center text-center group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg ${className}`}
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+};
+
+const FeatureCard = ({ icon, title, description, onClick }) => (
+  <Card 
+    className="group cursor-pointer transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
     onClick={onClick}
   >
-    <div className="w-24 h-24 rounded-full shadow-neumorphic-inset flex items-center justify-center mb-5 animate-icon-float">
-      {icon}
-    </div>
-    <h3 className="font-bold text-lg text-foreground mb-1">{title}</h3>
-    <p className="text-sm text-muted-foreground leading-snug">{description}</p>
-  </div>
+    <CardContent className="p-6 flex flex-col items-center text-center">
+      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+        {icon}
+      </div>
+      <h3 className="font-bold text-lg text-foreground mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </CardContent>
+  </Card>
 );
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const { data: userData, isLoading: userLoading, error } = useUserData();
+
+  const loading = authLoading || userLoading;
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
+    if (loading) return;
 
-          if (userDocSnap.exists()) {
-            const data = userDocSnap.data();
-            const riskLevel = data.riskLevel || 2; // Default risk level
-            setUserData({
-              name: data.name || 'User',
-              riskLevel: riskLevel,
-            });
-            setTasks(getTodaysTasks(riskLevel));
-          } else {
-            // If user doc doesn't exist, they might not have finished onboarding
-            navigate('/onboarding');
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Maybe navigate to an error page or show a message
-          navigate('/'); // For now, just go back to home
-        }
-      } else {
-        // User is signed out
-        navigate('/');
-      }
-      setLoading(false);
-    });
+    if (!user) {
+        navigate('/auth');
+    } else if (!userData && !error) {
+        navigate('/onboarding');
+    }
+}, [user, userData, loading, error, navigate]);
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
-  }, [navigate]);
-
-  const getWelcomeMessage = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  };
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen font-bold text-xl">Loading your wellness space...</div>;
-  }
-  
-  if (!userData) {
-    // This can happen briefly between loading and navigation
-    return <div className="flex items-center justify-center h-screen font-bold text-xl">Redirecting...</div>;
+  if (loading || !userData) {
+    return <LoadingSpinner fullScreen />;
   }
 
-
+  const riskLevel = userData.riskLevel || 2;
+  const tasks = getTodaysTasks(riskLevel);
   const dailyProgress = tasks.length > 0 ? (tasks.filter(t => t.completed).length / tasks.length) * 100 : 0;
 
   return (
-    <Layout className="bg-gradient-to-br from-primary/10 via-background to-accent/20">
-      <Container className="max-w-5xl py-8">
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-3xl font-extrabold text-secondary">Milo</h1>
-          <WellnessButton onClick={async () => { await auth.signOut(); navigate('/'); }} variant="ghost">Log Out</WellnessButton>
+    <Layout>
+        <header className="absolute top-0 left-0 right-0 p-4 bg-transparent z-10">
+            <Container className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-primary">Milo</h1>
+                <WellnessButton onClick={async () => { await auth.signOut(); navigate('/'); }} variant="outline">Log Out</WellnessButton>
+            </Container>
         </header>
 
-        <section className="mb-16 text-center">
-          <h2 className="text-5xl font-black tracking-tight text-foreground mb-3">{getWelcomeMessage()}, {userData.name}!</h2>
-          <p className="text-xl text-muted-foreground">Ready to brighten your day?</p>
+      <Container className="py-24 animate-fade-in">
+        <section className="mb-12">
+          <h2 className="text-4xl font-bold tracking-tight text-foreground">{getGreeting()}, {userData.name}!</h2>
+          <p className="text-lg text-muted-foreground">Here's your wellness dashboard for today.</p>
         </section>
 
-        {userData.riskLevel >= 4 && (
-          <Card className="mb-12 p-5 border-destructive/30 bg-destructive/10 shadow-lg">
+        {riskLevel >= 4 && (
+          <Card className="mb-8 p-5 border-destructive bg-destructive/10 shadow-lg">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-destructive/20 flex-shrink-0 flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-destructive" />
@@ -126,8 +105,8 @@ export default function Dashboard() {
                 <h3 className="font-bold text-destructive-foreground">Immediate Support Recommended</h3>
                 <p className="text-muted-foreground text-sm mb-4">Based on your recent check-in, we strongly recommend seeking professional support.</p>
                 <div className="flex flex-wrap gap-3">
-                  <WellnessButton onClick={() => navigate('/referral')} variant="secondary" size="sm">Find a Therapist</WellnessButton>
-                  <AlertDialog>
+                  <WellnessButton onClick={() => navigate('/referral')} variant="destructive" size="sm">Find Support</WellnessButton>
+                   <AlertDialog>
                     <AlertDialogTrigger asChild><WellnessButton variant="outline" size="sm">SOS Simulation</WellnessButton></AlertDialogTrigger>
                     <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>SOS Feature Simulation</AlertDialogTitle><AlertDialogDescription>In a real crisis, Milo would now send an SMS to your trusted contact with a request to check in on you. This is a simulation.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Understood</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
                   </AlertDialog>
@@ -137,24 +116,30 @@ export default function Dashboard() {
           </Card>
         )}
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <Card className="md:col-span-1 bg-background/80 shadow-neumorphic-sm border-0 bg-grid-pattern">
-            <CardHeader><CardTitle>Daily Progress</CardTitle></CardHeader>
+        <div className="grid md:grid-cols-3 gap-6 mb-6">
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle>Daily Progress</CardTitle>
+            </CardHeader>
             <CardContent>
-              <Progress value={dailyProgress} className="mb-2 h-3 [&>*]:bg-gradient-to-r [&>*]:from-secondary [&>*]:to-primary" />
-              <p className="text-sm font-semibold text-muted-foreground">{Math.round(dailyProgress)}% of tasks complete.</p>
+              <Progress value={dailyProgress} className="mb-2 h-3" />
+              <p className="text-sm font-semibold text-muted-foreground">{Math.round(dailyProgress)}% complete</p>
             </CardContent>
           </Card>
-          <Card className="md:col-span-2 bg-background/80 shadow-neumorphic-sm border-0 bg-grid-pattern">
-            <CardHeader><CardTitle>Today's Action Plan</CardTitle><CardDescription>A few small steps for a brighter day.</CardDescription></CardHeader>
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Today's Action Plan</CardTitle>
+              <CardDescription>Small steps toward a healthier you.</CardDescription>
+            </CardHeader>
             <CardContent>
               <ul className="space-y-3">
                 {tasks.map((task) => (
-                  <li key={task.id} className="flex items-center gap-4 p-2 rounded-lg transition-colors hover:bg-muted/50">
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shadow-neumorphic-sm-inset ${task.completed ? 'bg-wellness-safe/20' : 'bg-muted'}`}>
-                      {task.completed && <Check className="w-4 h-4 text-wellness-safe font-bold"/>}
+                  <li key={task.id} className="flex items-center gap-3 p-3 rounded-lg transition-colors bg-muted/50 hover:bg-muted">
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${task.completed ? 'border-primary bg-primary' : 'border-muted-foreground'}`}>
+                      {task.completed && <Check className="w-3 h-3 text-primary-foreground font-bold"/>}
                     </div>
-                    <span className={`font-semibold ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.title}</span>
+                    <span className={`flex-1 font-medium ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.title}</span>
+                    {!task.completed && <ArrowRight className="w-4 h-4 text-muted-foreground"/>}
                   </li>
                 ))}
               </ul>
@@ -162,34 +147,30 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <NeumorphicCard
-            icon={<BotMessageSquare className="w-12 h-12 text-secondary" />}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <FeatureCard
+            icon={<BotMessageSquare className="w-8 h-8" />}
             title="Chat with Milo"
             description="Your AI companion for daily reflections."
             onClick={() => navigate('/aichat')}
-            className=""
           />
-          <NeumorphicCard
-            icon={<NotebookPen className="w-12 h-12 text-primary" />}
+          <FeatureCard
+            icon={<NotebookPen className="w-8 h-8" />}
             title="Daily Journal"
             description="Record your thoughts, feelings, and progress."
             onClick={() => navigate('/journal')}
-            className=""
           />
-          <NeumorphicCard
-            icon={<UsersRound className="w-12 h-12 text-accent-foreground" />}
+          <FeatureCard
+            icon={<UsersRound className="w-8 h-8" />}
             title="Referral Network"
             description="Find therapists and support groups near you."
             onClick={() => navigate('/referral')}
-            className=""
           />
-          <NeumorphicCard
-            icon={<Goal className="w-12 h-12 text-wellness-concerned" />}
+          <FeatureCard
+            icon={<Goal className="w-8 h-8" />}
             title="Wellness Plan"
             description="Track your goals and personalized strategies."
             onClick={() => navigate('/plan')}
-            className=""
           />
         </div>
 
