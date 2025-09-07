@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, AlertTriangle } from 'lucide-react';
 import { getGenerativeAIService } from '@/integrations/firebase/client';
-import { getGenerativeModel, ChatSession } from 'firebase/ai';
+import type { ChatSession } from '@google/generative-ai';
 
 interface Message {
   id: string;
@@ -37,11 +37,9 @@ export default function AIChat() {
     // Initialize the model and chat session safely after the component has mounted.
     try {
       const generativeAI = getGenerativeAIService();
-      const model = getGenerativeModel(generativeAI, {
-        model: 'gemini-1.5-flash-preview-0514',
-        systemInstruction: {
-          parts: [{ text: "You are Milo, a friendly and supportive wellness companion. Your goal is to help users reflect, feel understood, and offer gentle guidance. Do not provide medical advice. Keep your responses concise and encouraging." }]
-        },
+      const model = generativeAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: "You are Milo, a friendly and supportive wellness companion. Your goal is to help users reflect, feel understood, and offer gentle guidance. Do not provide medical advice. Keep your responses concise and encouraging."
       });
       const newChat = model.startChat({ history: [] });
       setChat(newChat);

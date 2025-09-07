@@ -22,8 +22,14 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // This would ideally be in a utils file
-const getTodaysTasks = (riskLevel) => {
-  const tasks = {
+interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
+}
+
+const getTodaysTasks = (riskLevel: number): Task[] => {
+  const tasks: Record<number, Task[]> = {
     1: [{ id: 1, title: 'Complete a 5-minute breathing exercise', completed: true }, { id: 2, title: 'Check in with your mood for the day', completed: false }],
     2: [{ id: 1, title: 'Try a 10-minute guided meditation', completed: true }, { id: 2, title: 'Write a short journal entry about your day', completed: false }],
     3: [{ id: 1, title: 'Practice a short mindfulness exercise', completed: false }, { id: 2, title: "Chat with Milo about what's on your mind", completed: false }],
@@ -40,8 +46,15 @@ const getGreeting = () => {
   return 'Good Evening';
 };
 
-const FeatureCard = ({ icon, title, description, onClick }) => (
-  <Card 
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  onClick: () => void;
+}
+
+const FeatureCard = ({ icon, title, description, onClick }: FeatureCardProps) => (
+  <Card
     className="group cursor-pointer transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
     onClick={onClick}
   >
@@ -105,7 +118,7 @@ export default function Dashboard() {
                 <h3 className="font-bold text-destructive-foreground">Immediate Support Recommended</h3>
                 <p className="text-muted-foreground text-sm mb-4">Based on your recent check-in, we strongly recommend seeking professional support.</p>
                 <div className="flex flex-wrap gap-3">
-                  <WellnessButton onClick={() => navigate('/referral')} variant="destructive" size="sm">Find Support</WellnessButton>
+                  <WellnessButton onClick={() => navigate('/referral')} variant="critical" size="sm">Find Support</WellnessButton>
                    <AlertDialog>
                     <AlertDialogTrigger asChild><WellnessButton variant="outline" size="sm">SOS Simulation</WellnessButton></AlertDialogTrigger>
                     <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>SOS Feature Simulation</AlertDialogTitle><AlertDialogDescription>In a real crisis, Milo would now send an SMS to your trusted contact with a request to check in on you. This is a simulation.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction>Understood</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
@@ -165,12 +178,6 @@ export default function Dashboard() {
             title="Referral Network"
             description="Find therapists and support groups near you."
             onClick={() => navigate('/referral')}
-          />
-          <FeatureCard
-            icon={<Goal className="w-8 h-8" />}
-            title="Wellness Plan"
-            description="Track your goals and personalized strategies."
-            onClick={() => navigate('/plan')}
           />
         </div>
 

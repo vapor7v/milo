@@ -4,7 +4,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
-import { getAI, getGoogleAIProvider } from "firebase/ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -25,20 +25,22 @@ const db = getFirestore(app);
 const functions = getFunctions(app);
 
 // Lazy-initialize the AI service to prevent startup crashes
-let generativeAIInstance;
+let generativeAIInstance: GoogleGenerativeAI | null = null;
 export const getGenerativeAIService = () => {
   if (!generativeAIInstance) {
-    generativeAIInstance = getAI(app, { provider: getGoogleAIProvider() });
+    // Note: You need to set GOOGLE_AI_API_KEY in your environment variables
+    const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || firebaseConfig.apiKey;
+    generativeAIInstance = new GoogleGenerativeAI(apiKey);
   }
   return generativeAIInstance;
 };
 
 // Connect to emulators in development, ensuring it only runs in the browser
-if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  console.log("Connecting to Firebase emulators");
-  connectAuthEmulator(auth, "http://localhost:9099");
-  connectFirestoreEmulator(db, 'localhost', 8080);
-  connectFunctionsEmulator(functions, 'localhost', 5001);
-}
+// if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+//   console.log("Connecting to Firebase emulators");
+//   connectAuthEmulator(auth, "http://localhost:9099");
+//   connectFirestoreEmulator(db, 'localhost', 8080);
+//   connectFunctionsEmulator(functions, 'localhost', 5001);
+// }
 
 export { app, analytics, auth, db, functions };

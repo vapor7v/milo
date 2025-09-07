@@ -18,7 +18,7 @@ const AuthPage = lazy(() => import("./pages/Auth"));
 const Referral = lazy(() => import("./pages/Referral"));
 const CheckIn = lazy(() => import("./pages/CheckIn"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
-const Journal = lazy(() => import("./pages/Journal"));
+const Journal = lazy(() => import("./pages/journal"));
 
 const App = () => {
   const { toast } = useToast();
