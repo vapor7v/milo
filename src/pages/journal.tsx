@@ -156,7 +156,23 @@ export default function JournalPage() {
                 <CardContent>
                     <form onSubmit={onSubmit} className="space-y-4">
                         <Textarea value={entry} onChange={(e) => setEntry(e.target.value)} placeholder="Write your journal..." className="min-h-[150px]" />
-                        <Input value={mood} onChange={(e) => setMood(e.target.value)} placeholder="Mood (e.g., anxious, calm)" />
+                        <select
+                          value={mood}
+                          onChange={(e) => setMood(e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Select your mood</option>
+                          <option value="excellent">😊 Excellent</option>
+                          <option value="good">🙂 Good</option>
+                          <option value="neutral">😐 Neutral</option>
+                          <option value="anxious">😰 Anxious</option>
+                          <option value="sad">😢 Sad</option>
+                          <option value="angry">😠 Angry</option>
+                          <option value="stressed">😫 Stressed</option>
+                          <option value="calm">😌 Calm</option>
+                          <option value="excited">🤩 Excited</option>
+                          <option value="tired">😴 Tired</option>
+                        </select>
                         <WellnessButton type="submit">Save Journal</WellnessButton>
                     </form>
                 </CardContent>
@@ -185,7 +201,7 @@ export default function JournalPage() {
                             {h.mood && <p className="text-sm font-semibold text-primary">Mood: {h.mood}</p>}
                             <div className="flex gap-2 mt-4">
                                 <WellnessButton size="sm" variant="outline" onClick={() => startEdit(h)}>Edit</WellnessButton>
-                                <WellnessButton size="sm" variant="destructive" onClick={() => handleDelete(h.id!)}>Delete</WellnessButton>
+                                <WellnessButton size="sm" variant="outline" onClick={() => handleDelete(h.id!)}>Delete</WellnessButton>
                             </div>
                         </div>
                         )}

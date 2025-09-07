@@ -8,10 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import type { User } from 'firebase/auth';
 
 export default function Onboarding() {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -45,7 +46,7 @@ export default function Onboarding() {
         return () => unsubscribe();
     }, [navigate]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
@@ -56,13 +57,19 @@ export default function Onboarding() {
             return;
         }
 
+        if (!user) {
+            setError('User not authenticated. Please try logging in again.');
+            setLoading(false);
+            return;
+        }
+
         try {
             await setDoc(doc(db, "users", user.uid), {
                 name, workHours: { start: workStart, end: workEnd }, wellnessGoals, trustedContact,
                 email: user.email, onboardingComplete: true
             }, { merge: true });
 
-            navigate('/dashboard');
+            navigate('/aichat');
         } catch (err) {
             console.error("Onboarding failed:", err);
             setError('Failed to save your information. Please try again.');
