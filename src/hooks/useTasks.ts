@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { db } from '@/integrations/firebase/client';
-import { doc, setDoc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 
 export interface TaskProgress {
   id: string;
@@ -26,6 +26,44 @@ export const useTasks = () => {
 
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
+  const loadTodaysTasks = async () => {
+    if (!user || !user.uid) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const taskRef = doc(db, 'task_progress', user.uid, 'daily', today);
+      const taskSnap = await getDoc(taskRef);
+
+      if (taskSnap.exists()) {
+        const data = taskSnap.data() as DailyTasks;
+        // Validate loaded task data
+        const validTasks = (data.tasks || []).filter(task =>
+          task &&
+          typeof task.id === 'string' &&
+          typeof task.title === 'string' &&
+          typeof task.completed === 'boolean' &&
+          typeof task.date === 'string' &&
+          (task.completedAt === undefined || task.completedAt instanceof Timestamp)
+        );
+        setTasks(validTasks);
+      } else {
+        // Initialize with empty tasks for today
+        setTasks([]);
+      }
+    } catch (err: unknown) {
+      console.error('Error loading tasks:', err);
+      // Don't set error for permission issues - just log and continue with empty tasks
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((err as any).code !== 'permission-denied') {
+        setError('Failed to load tasks');
+      }
+      setTasks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load today's tasks
   useEffect(() => {
     if (!user) {
@@ -37,67 +75,63 @@ export const useTasks = () => {
     loadTodaysTasks();
   }, [user]);
 
-  const loadTodaysTasks = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-      const taskRef = doc(db, 'task_progress', user.uid, 'daily', today);
-      const taskSnap = await getDoc(taskRef);
-
-      if (taskSnap.exists()) {
-        const data = taskSnap.data() as DailyTasks;
-        setTasks(data.tasks);
-      } else {
-        // Initialize with empty tasks for today
-        setTasks([]);
-      }
-    } catch (err: any) {
-      console.error('Error loading tasks:', err);
-      // Don't set error for permission issues - just log and continue with empty tasks
-      if (err.code !== 'permission-denied') {
-        setError('Failed to load tasks');
-      }
-      setTasks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const saveTodaysTasks = async (updatedTasks: TaskProgress[]) => {
-    if (!user) return;
+    if (!user || !user.uid) return;
 
     try {
+      // Validate task data before saving
+      const validTasks = updatedTasks.filter(task =>
+        task &&
+        typeof task.id === 'string' &&
+        typeof task.title === 'string' &&
+        typeof task.completed === 'boolean' &&
+        typeof task.date === 'string' &&
+        (task.completedAt === undefined || task.completedAt instanceof Timestamp)
+      );
+
       const taskRef = doc(db, 'task_progress', user.uid, 'daily', today);
       const dailyTasks: DailyTasks = {
         date: today,
-        tasks: updatedTasks,
+        tasks: validTasks,
         userId: user.uid,
         lastUpdated: Timestamp.now()
       };
 
       await setDoc(taskRef, dailyTasks);
-      setTasks(updatedTasks);
+      setTasks(validTasks);
       setError(null); // Clear any previous errors
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving tasks:', err);
       // Don't set error for permission issues - just log
-      if (err.code !== 'permission-denied') {
+      if ((err as { code?: string })?.code !== 'permission-denied') {
         setError('Failed to save tasks');
       }
     }
   };
 
   const toggleTaskCompletion = async (taskId: string) => {
+    if (!taskId || typeof taskId !== 'string') {
+      console.error('Invalid taskId provided to toggleTaskCompletion:', taskId);
+      return;
+    }
+
     const updatedTasks = tasks.map(task => {
       if (task.id === taskId) {
         const completed = !task.completed;
-        return {
+        const updatedTask = {
           ...task,
           completed,
-          completedAt: completed ? Timestamp.now() : undefined
         };
+
+        // Only include completedAt if the task is completed
+        if (completed) {
+          updatedTask.completedAt = Timestamp.now();
+        } else {
+          // Remove completedAt when uncompleting the task
+          delete (updatedTask as any).completedAt;
+        }
+
+        return updatedTask;
       }
       return task;
     });
@@ -106,7 +140,7 @@ export const useTasks = () => {
   };
 
   const updateTasksFromWellnessPlan = async (wellnessTasks: string[]) => {
-    if (!user || wellnessTasks.length === 0) return;
+    if (!user || !user.uid || wellnessTasks.length === 0) return;
 
     const wellnessTaskProgress: TaskProgress[] = wellnessTasks.map((task, index) => ({
       id: `wellness_${index}`,

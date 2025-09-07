@@ -4,15 +4,12 @@ import { WellnessButton } from '@/components/WellnessButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, AlertTriangle } from 'lucide-react';
 import { getGenerativeAIService, db } from '@/integrations/firebase/client';
 import { doc, collection, addDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/hooks/useAuth';
-import { useWellness } from '@/hooks/useWellness';
 import { wellnessAnalysisService } from '@/lib/wellnessAnalysis';
-import { Brain } from 'lucide-react';
 import type { ChatSession } from '@google/generative-ai';
 
 interface Message {

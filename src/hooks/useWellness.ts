@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { wellnessAnalysisService, WellnessPlan } from '@/lib/wellnessAnalysis';
 import { db } from '@/integrations/firebase/client';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 export const useWellness = () => {
   const { user } = useAuth();

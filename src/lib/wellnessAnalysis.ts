@@ -61,7 +61,7 @@ export class WellnessAnalysisService {
       const analysis = await this.analyzeContentWithAI(messages, journalEntries);
 
       // Generate wellness plan
-      const wellnessPlan = await this.generateWellnessPlan(userId, analysis, messages, journalEntries);
+      const wellnessPlan = await this.generateWellnessPlan(userId, analysis);
 
       // Store the wellness plan
       await this.storeWellnessPlan(userId, wellnessPlan);
@@ -214,7 +214,7 @@ export class WellnessAnalysisService {
     }
   }
 
-  private async generateWellnessPlan(userId: string, analysis: any, messages: ChatMessage[], journalEntries: JournalEntry[]): Promise<WellnessPlan> {
+  private async generateWellnessPlan(userId: string, analysis: any): Promise<WellnessPlan> {
     try {
       const model = this.generativeAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -350,8 +350,6 @@ export class WellnessAnalysisService {
 
   async getWellnessPlan(userId: string): Promise<WellnessPlan | null> {
     try {
-      const planRef = doc(db, 'wellness_profiles', userId);
-      const planSnap = await getDocs(query(collection(db, 'wellness_profiles')));
       // Note: This is a simplified version. In production, you'd query the specific document
       return null; // Implement proper retrieval
     } catch (error) {

@@ -26,27 +26,6 @@
     --radius: 0.75rem;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
-  }
 }
 
 @layer base {
@@ -66,11 +45,6 @@
   border: 1px solid rgba(255, 255, 255, 0.125);
 }
 
-.frosted-glass-dark {
-  backdrop-filter: blur(16px) saturate(180%);
-  background-color: rgba(17, 25, 40, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.125);
-}
 
 /* Enhanced Button Styles */
 .btn-primary {
@@ -102,17 +76,6 @@
   @apply scale-95;
 }
 
-/* Dark mode button variants */
-.dark .btn-secondary {
-  @apply text-gray-200;
-  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.dark .btn-secondary:hover {
-  @apply text-white;
-  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
-}
 
 /* Card Enhancements */
 .card-enhanced {
@@ -136,15 +99,6 @@
   @apply shadow-3xl scale-102;
 }
 
-/* Dark mode card enhancements */
-.dark .card-enhanced {
-  background: linear-gradient(135deg, rgba(17, 25, 40, 0.9) 0%, rgba(17, 25, 40, 0.7) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.dark .card-enhanced::before {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-}
 
 /* Input Enhancements */
 .input-enhanced {
@@ -159,14 +113,6 @@
   background: rgba(255, 255, 255, 0.95);
 }
 
-.dark .input-enhanced {
-  background: rgba(17, 25, 40, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark .input-enhanced:focus {
-  background: rgba(17, 25, 40, 0.95);
-}
 
 /* Animation Classes */
 @keyframes fadeIn {
@@ -219,9 +165,6 @@
   @apply bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent;
 }
 
-.dark .gradient-text {
-  @apply bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
-}
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
@@ -240,13 +183,6 @@
   @apply from-primary/80 to-purple-600/80;
 }
 
-.dark .custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-slate-700;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-b from-blue-500 to-purple-500;
-}
 
 /* Loading States */
 .loading-shimmer {

@@ -8,7 +8,6 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useToast } from "@/components/ui/use-toast";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { NotificationBanner } from "@/components/NotificationBanner";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -45,77 +44,75 @@ const App = () => {
   });
 
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ErrorBoundary>
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/onboarding"
-                    element={
-                      <ProtectedRoute>
-                        <Onboarding />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/aichat"
-                    element={
-                      <ProtectedRoute>
-                        <AIChat />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/meditation-challenge"
-                    element={
-                      <ProtectedRoute>
-                        <MeditationChallenge />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/referral"
-                    element={
-                      <ProtectedRoute>
-                        <Referral />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/check-in"
-                    element={
-                      <ProtectedRoute>
-                        <CheckIn />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/journal"
-                    element={
-                      <ProtectedRoute>
-                        <Journal />
-                      </ProtectedRoute>
-                    }
-                  />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <NotificationBanner />
-              </Suspense>
-            </ErrorBoundary>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/onboarding"
+                  element={
+                    <ProtectedRoute>
+                      <Onboarding />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/aichat"
+                  element={
+                    <ProtectedRoute>
+                      <AIChat />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/meditation-challenge"
+                  element={
+                    <ProtectedRoute>
+                      <MeditationChallenge />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/referral"
+                  element={
+                    <ProtectedRoute>
+                      <Referral />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/check-in"
+                  element={
+                    <ProtectedRoute>
+                      <CheckIn />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/journal"
+                  element={
+                    <ProtectedRoute>
+                      <Journal />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <NotificationBanner />
+            </Suspense>
+          </ErrorBoundary>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
